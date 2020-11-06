@@ -1,0 +1,3 @@
+D:\Installs\JetBrains\Toolbox\apps\CLion\ch-0\202.7319.72\bin\cmake\win\bin\cmake.exe -E rm -f CMakeFiles\BUAA_Compiler2020_Clion_Edition.dir/objects.a
+D:\mingw64\mingw64\bin\ar.exe cr CMakeFiles\BUAA_Compiler2020_Clion_Edition.dir/objects.a @CMakeFiles\BUAA_Compiler2020_Clion_Edition.dir\objects1.rsp
+D:\mingw64\mingw64\bin\g++.exe -g   -Wl,--whole-archive CMakeFiles\BUAA_Compiler2020_Clion_Edition.dir/objects.a -Wl,--no-whole-archive  -o BUAA_Compiler2020_Clion_Edition.exe -Wl,--out-implib,libBUAA_Compiler2020_Clion_Edition.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\BUAA_Compiler2020_Clion_Edition.dir\linklibs.rsp

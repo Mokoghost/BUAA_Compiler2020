@@ -1,0 +1,10 @@
+const char a = 1;
+char c(){
+	if(1=1){
+		return (c()+c());
+	}
+	return (c()*c());
+}
+void main(){
+	;
+}

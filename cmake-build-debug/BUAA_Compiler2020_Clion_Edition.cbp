@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="BUAA_Compiler2020_Clion_Edition"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="D:/mingw64/mingw64/bin/mingw32-make.exe -f &quot;D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="D:/mingw64/mingw64/bin/mingw32-make.exe -f &quot;D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="D:/mingw64/mingw64/bin/mingw32-make.exe -f &quot;D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="D:/mingw64/mingw64/bin/mingw32-make.exe -f &quot;D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="BUAA_Compiler2020_Clion_Edition">
+				<Option output="D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/BUAA_Compiler2020_Clion_Edition.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="D:/mingw64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++"/>
+					<Add directory="D:/mingw64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/x86_64-w64-mingw32"/>
+					<Add directory="D:/mingw64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/backward"/>
+					<Add directory="D:/mingw64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include"/>
+					<Add directory="D:/mingw64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include-fixed"/>
+					<Add directory="D:/mingw64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/../../../../x86_64-w64-mingw32/include"/>
+					<Add directory="D:\mingw64\mingw64\include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="D:/mingw64/mingw64/bin/mingw32-make.exe -f &quot;D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/Makefile&quot;  VERBOSE=1 BUAA_Compiler2020_Clion_Edition"/>
+					<CompileFile command="D:/mingw64/mingw64/bin/mingw32-make.exe -f &quot;D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="D:/mingw64/mingw64/bin/mingw32-make.exe -f &quot;D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="D:/mingw64/mingw64/bin/mingw32-make.exe -f &quot;D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="BUAA_Compiler2020_Clion_Edition/fast">
+				<Option output="D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/BUAA_Compiler2020_Clion_Edition.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="D:/mingw64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++"/>
+					<Add directory="D:/mingw64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/x86_64-w64-mingw32"/>
+					<Add directory="D:/mingw64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/backward"/>
+					<Add directory="D:/mingw64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include"/>
+					<Add directory="D:/mingw64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include-fixed"/>
+					<Add directory="D:/mingw64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/../../../../x86_64-w64-mingw32/include"/>
+					<Add directory="D:\mingw64\mingw64\include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="D:/mingw64/mingw64/bin/mingw32-make.exe -f &quot;D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/Makefile&quot;  VERBOSE=1 BUAA_Compiler2020_Clion_Edition/fast"/>
+					<CompileFile command="D:/mingw64/mingw64/bin/mingw32-make.exe -f &quot;D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="D:/mingw64/mingw64/bin/mingw32-make.exe -f &quot;D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="D:/mingw64/mingw64/bin/mingw32-make.exe -f &quot;D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="D:/mingw64/mingw64/bin/mingw32-make.exe -f &quot;D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="D:/mingw64/mingw64/bin/mingw32-make.exe -f &quot;D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="D:/mingw64/mingw64/bin/mingw32-make.exe -f &quot;D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="D:/mingw64/mingw64/bin/mingw32-make.exe -f &quot;D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="D:/mingw64/mingw64/bin/mingw32-make.exe -f &quot;D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="D:/mingw64/mingw64/bin/mingw32-make.exe -f &quot;D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="D:/mingw64/mingw64/bin/mingw32-make.exe -f &quot;D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="D:/mingw64/mingw64/bin/mingw32-make.exe -f &quot;D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/GenerateIntermediateCode.cpp">
+			<Option target="BUAA_Compiler2020_Clion_Edition"/>
+		</Unit>
+		<Unit filename="D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/GenerateMIPSAssembly.cpp">
+			<Option target="BUAA_Compiler2020_Clion_Edition"/>
+		</Unit>
+		<Unit filename="D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/Identifier.cpp">
+			<Option target="BUAA_Compiler2020_Clion_Edition"/>
+		</Unit>
+		<Unit filename="D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/compiler.h">
+			<Option target="BUAA_Compiler2020_Clion_Edition"/>
+		</Unit>
+		<Unit filename="D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/function.cpp">
+			<Option target="BUAA_Compiler2020_Clion_Edition"/>
+		</Unit>
+		<Unit filename="D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/functionTable.cpp">
+			<Option target="BUAA_Compiler2020_Clion_Edition"/>
+		</Unit>
+		<Unit filename="D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/identityTable.cpp">
+			<Option target="BUAA_Compiler2020_Clion_Edition"/>
+		</Unit>
+		<Unit filename="D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/lexicalAnalysis.cpp">
+			<Option target="BUAA_Compiler2020_Clion_Edition"/>
+		</Unit>
+		<Unit filename="D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/main.cpp">
+			<Option target="BUAA_Compiler2020_Clion_Edition"/>
+		</Unit>
+		<Unit filename="D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/syntaxAnalysis.cpp">
+			<Option target="BUAA_Compiler2020_Clion_Edition"/>
+		</Unit>
+		<Unit filename="D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/tokenType.cpp">
+			<Option target="BUAA_Compiler2020_Clion_Edition"/>
+		</Unit>
+		<Unit filename="D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

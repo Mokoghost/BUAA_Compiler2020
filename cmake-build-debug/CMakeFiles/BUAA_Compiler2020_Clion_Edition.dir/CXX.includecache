@@ -1,0 +1,40 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/compiler.h
+cstdio
+-
+cstring
+-
+cctype
+-
+string
+-
+iostream
+-
+fstream
+-
+vector
+-
+map
+-
+sstream
+-
+algorithm
+-
+utility
+-
+
+D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/lexicalAnalysis.cpp
+lexicalAnalysis.h
+D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/lexicalAnalysis.h
+
+D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/lexicalAnalysis.h
+compiler.h
+D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/compiler.h
+
