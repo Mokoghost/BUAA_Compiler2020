@@ -1,3 +1,0 @@
-D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/CMakeFiles/BUAA_Compiler2020_Clion_Edition.dir
-D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/CMakeFiles/edit_cache.dir
-D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug/CMakeFiles/rebuild_cache.dir

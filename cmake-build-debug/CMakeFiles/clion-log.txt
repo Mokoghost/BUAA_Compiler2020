@@ -1,4 +1,0 @@
-D:\Installs\JetBrains\Toolbox\apps\CLion\ch-0\202.7319.72\bin\cmake\win\bin\cmake.exe -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - MinGW Makefiles" D:\XPYSTUDY\Compiler\BUAA-Compiler2020-Clion-Edition
--- Configuring done
--- Generating done
--- Build files have been written to: D:/XPYSTUDY/Compiler/BUAA-Compiler2020-Clion-Edition/cmake-build-debug
