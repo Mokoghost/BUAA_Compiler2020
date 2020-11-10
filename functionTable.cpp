@@ -3,9 +3,9 @@
 void functionTable::addToken(function &fn, int l) {
     string name = fn.getName();
     transform(name.begin(), name.end(), name.begin(), ::tolower);
-    if (tokens.count(name) == 0 && !globalTable.contains(name))
+    if (tokens.count(name) == 0 && !globalTable.contains(name)) {
         tokens.insert(pair<string, function>(name, fn));
-    else
+    } else
         error_syntax(to_string(l) + " b");
 }
 

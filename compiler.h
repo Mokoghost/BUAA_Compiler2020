@@ -12,7 +12,7 @@
 #include <sstream>
 #include <algorithm>
 #include <utility>
-
+#include <math.h>
 
 enum tokenCategory {
     IDENFR = 0, INTCON, CHARCON, STRCON, CONSTTK, INTTK, CHARTK, VOIDTK, MAINTK, IFTK,
@@ -23,6 +23,21 @@ enum tokenCategory {
 enum identifierCategory {
     CONST = 0, VAR, ARG
 };
+enum Reg {
+    $zero = 0, $at, $v0, $v1, $a0, $a1, $a2, $a3, $t0, $t1, $t2, $t3, $t4, $t5, $t6, $t7, $s0,
+    $s1, $s2, $s3, $s4, $s5, $s6, $s7, $t8, $t9, $gp, $sp, $fp, $ra, nullReg
+};
+enum varType {
+    STR_VAR = 1, LOCAL_VAR, GLOBAL_VAR, TEMP_VAR, EQUAL, CHARACTER, INTEGER, OP
+};
+enum syscallType {
+    PRINT_INT, PRINT_STR, READ_INT, EXIT, PRINT_CHAR, READ_CHARACTER
+};
+//enum mipsOp {
+//    add, addi, addiu, addu, sub, subu, And, andi, nor, Or, ori, Xor, xori, sll, srl, sra, sllv, srlv, srav, slt, slti,
+//    sltiu, sltu, beq, bne, blt, bgt, ble, blez, bge, bgez, j, jal, jr, jalr, move,mfc0,mfho, mflo, mtc0, mthi, mtlo, mult,
+//    multu, Div, divu, lb, lbu, lh, lhu, lui, lw, li, la, sb, sh, sw, syscall, eret, Break
+//};
 using namespace std;
 extern FILE *testfile;//
 extern ofstream out;//语法分析&词法分析输出
@@ -61,7 +76,14 @@ private:
     int dimension1;
     int dimension2;
     enum identifierCategory kind;
+    vector<char> charValue;
+    vector<int> intValue;
+    enum Reg reg;
+    string memoryAddress;
 public:
+    bool initialized;
+    bool changed;
+
     Identifier(string name, enum tokenCategory type);//初始化一个标识符
 
     void setIdentifierCategory(enum identifierCategory kind);//设置标识符种类（Const、Arg、Var）
@@ -70,7 +92,25 @@ public:
 
     void setDimension(int d, int num);//设置某一维大小
 
-//    int getDimension(int d);//获取某一维大小
+    int getDimension(int d);//获取某一维大小
+
+    void setValue(int value);//设置常量或变量的值
+
+    void setValue(char value);//设置常量或变量的值
+
+    int getIntValue(int index1, int index2);//获取常量或变量的值
+
+    char getCharValue(int index1, int index2);//获取常量或变量的值
+
+    void setMemory(string memory);//存入内存
+
+    void allocateRegister(enum Reg reg1);//分配寄存器
+
+    void removeRegister();//从寄存器中取出
+
+    int getSize() const;//获取空间大小
+
+    void change();//标记变量已经改变
 };
 
 
@@ -85,6 +125,10 @@ public:
     Identifier getToken(const string &name);//以名称为key获取一个Identifier
 
     bool contains(const string &name);//是否包含一个Identifier
+
+    map<string, Identifier> getTokens();//获取所有变量
+
+    void varChange(string varName);//改变某变量的状态（已被赋值）
 };
 
 
@@ -95,6 +139,7 @@ private:
     identityTable tokenTable;
 public:
     int returnNum;
+    int tempNum;
 
     function();
 
@@ -110,7 +155,11 @@ public:
 
     Identifier getToken(const string &name);//以名称为key获取一个Identifier
 
-    bool contains(string name);//是否包含一个Identifier
+    bool contains(const string &name);//标识符符号表中是否包含一个Identifier
+
+    identityTable getTokenTable();//返回整个函数的符号表
+
+    void varChange(string varName);//改变某变量的状态（已被赋值）
 };
 
 class functionTable {
@@ -138,8 +187,8 @@ extern identityTable globalTable;//全局标识符符号表
 extern int num;
 extern int tokenPointer;
 extern enum tokenCategory Token;
-extern char tokenCategoryString[39][10];
-extern char reserves[15][10];
+extern const char tokenCategoryString[39][10];
+extern const char reserves[15][10];
 
 int getToken();//词法分析
 int lexAnalysisIm();//词法分析实现
@@ -159,7 +208,7 @@ int isLpar(), isRpar(), isLbrack(), isRbrack(), isLbrace(), isRbrace();
 
 void catToken();//拼接字符
 void retractChar();//退回一个字符
-int isReserve()/*是否为保留字*/, transNum()/*数字转换*/, isEof()/*是否为EOF*/;
+int isReserve()/*是否为保留字*/, isEof()/*是否为EOF*/;
 
 int isStringChar();//是否是string中的合法字符
 
@@ -184,10 +233,11 @@ int isStringChar();//是否是string中的合法字符
 #define STATEMENT_LIST 14
 #define BLOCK_STATEMENT 15
 
-extern char syntaxCategoryString[37][40];
-extern int Int;
+//extern char syntaxCategoryString[37][40];
 
-//只要是可选的，必须有空串的判断（也即传入一个参数，若是可选的，则允许为空；若是必选的，则不允许为空）。optional为1说明可选，若为0说明必选。
+/*只要是可选的，必须有空串的判断（也即传入一个参数，若是可选的，则允许为空；
+ * 若是必选的，则不允许为空）。optional为1说明可选，若为0说明必选。
+*/
 //所有函数调用前必须首先getToken()
 //所有函数结束调用时不要getToken()
 
@@ -210,9 +260,9 @@ int functionDefineWithoutReturn(int optional);//无返回值函数定义
 int compoundStatement(function &fn);//复合语句
 int parametersTable(function &fn);//参数表
 int mainFunction();//主函数
-int expression(function &fn);//表达式
-int term(function &fn);//项
-int factor(function &fn);//因子
+int expression(function &fn, string &vn);//表达式
+int term(function &fn, string &vn);//项
+int factor(function &fn, string &vn);//因子
 int statement(int optional, function &fn);//语句
 int assignmentStatement(int optional, function &fn);//赋值语句
 int conditionStatement(int optional, function &fn);//条件语句
@@ -234,13 +284,13 @@ int synAnalysis();//语法分析
 
 int isTypeIdentifier();//类型标识符
 int equalType(enum tokenCategory type, int constRet);//类型标识符是否相同
-int isRelation();//关系运算符
+//int isRelation();//关系运算符
 int judgeSection();//判断是程序的拿一部分
 bool isStatement();//判断是否为语句
 int statementsWithSemi(function &fn);//以分号结尾的语句
 int statementsWithoutSemi(function &fn);//不以分号结尾的语句
 int isCharacter();//判断token是否为CHARCON
-bool isCharExp(function &fn);//判断表达式是否为char类型
+bool isCharExp(function &fn, string &vn);//判断表达式是否为char类型
 bool expressTypeEqual(int expressType, enum tokenCategory tc);//判断expression类型是否和某类型相同
 void retractTokens(int numOfTokens);//退回token，你说个数吧，要退多少个
 void getTokens(int numOfTokens);//读入token，你说个数吧，要读多少个
@@ -251,12 +301,51 @@ int isOperation();//判断是否为运算符
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////GenerateIntermediateCode///////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-extern identityTable consts;//定义的所有const（由于保证程序语法正确，因此不区分作用域）
 extern vector<string> intermediateCode;//中间代码
-void addQuaternion(vector<string> strings);//增加一条四元式
+extern vector<vector<string>> intermediateCodeInner;//从中间代码转MIPS时实际使用的
+extern vector<string> identityType;
+
+void addQuaternion(const vector<string> &quaternion);//增加一条四元式
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////GenerateMIPSAssembly/////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-void addMIPSAssembly();//增加一条汇编代码
+#define DATA_BASE_ADDRESS 0x10010000
+extern vector<string> mipsCode;//目标代码
+extern map<string, string> strings;//字符串
+extern int strNum;//字符串编号
+extern const char registers[32][6];//寄存器名
+extern const int syscallService[6];//syscall服务
+extern bool usedRegister[32];//已使用的寄存器
+extern map<string, enum Reg> var2reg;//变量对应的寄存器
+extern map<enum Reg, string> reg2var;//寄存器存储的变量
+extern map<string, enum tokenCategory> tempType;//临时变量类型
+extern map<string, int> var2mem;//变量对应的内存
+extern map<int, string> mem2var;//内存地址存储的变量
+extern enum Reg regPointer;//寄存器循环指针，永远指向下一个要用的寄存器
+
+void enter();
+
+void generateMIPSAssembly();//目标代码生成
+void allocateMemory();//为全局变量分配内存
+extern void generateFunctionMIPS(function &fn);//生成函数的MIPS代码
+void variableArrangeRegister(function &fn, string &putInVar, enum varType type);//给变量分配寄存器
+
+void generateScanMIPS(function &fn, vector<string> &inter);//生成MIPS读语句
+
+void generatePrintMIPS(function &fn, vector<string> &inter);//生成
+
+void globalVariableLoad(function &fn);//将全局变量存入内存
+
+void generateStatement(function &fn, vector<string> &inter);
+
+int whatIsThisShit(string &varName, function &fn);
+
+void generatePrintEnter();
+
+string getValueOfVar(string &varName, function &fn);
+
+string getRealName(string varName, char end);//消除某符号对变量名称的影响
+
+void makeChanged(string varName,function &fn);//标记变量已经改变

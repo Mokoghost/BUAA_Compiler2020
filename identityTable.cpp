@@ -24,4 +24,12 @@ bool identityTable::contains(const string &name) {
         return true;
 }
 
+map<string, Identifier> identityTable::getTokens() {
+    return tokens;
+}
+
+void identityTable::varChange(string varName) {
+    this->tokens.at(varName).change();
+}
+
 identityTable::identityTable() = default;

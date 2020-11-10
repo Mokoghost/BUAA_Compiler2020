@@ -8,19 +8,18 @@ int charPointer;
 int tokenPointer;
 int line = 1;
 string ans;
-int num;
 enum tokenCategory Token;
 vector<enum tokenCategory> formerTokens;
 vector<pair<string, int>> formerAns;
 vector<string> outputAns;
 vector<string> outputErr;
-char tokenCategoryString[39][10]
+const  char tokenCategoryString[39][10]
         = {"IDENFR", "INTCON", "CHARCON", "STRCON", "CONSTTK", "INTTK", "CHARTK", "VOIDTK", "MAINTK", "IFTK",
            "ELSETK", "SWITCHTK", "CASETK", "DEFAULTTK", "WHILETK", "FORTK", "SCANFTK", "PRINTFTK", "RETURNTK", "PLUS",
            "MINU", "MULT", "DIV", "LSS", "LEQ", "GRE", "GEQ", "EQL", "NEQ", "COLON",
            "ASSIGN", "SEMICN", "COMMA", "LPARENT", "RPARENT", "LBRACK", "RBRACK", "LBRACE", "RBRACE"
         };
-char reserves[15][10]
+const char reserves[15][10]
         = {"const", "int", "char", "void", "main", "if", "else", "switch", "case",
            "default", "while", "for", "scanf", "printf", "return"
         };
@@ -49,7 +48,7 @@ int lexAnalysisIm() {
             error_lexical();
             getChar();
             Token = STRCON;
-            ans = string(token, 0, charPointer);
+            ans = string(token, 0, charPointer);/* NOLINT */
             return 0;
         }
         while (!isQuote()) {
@@ -77,7 +76,6 @@ int lexAnalysisIm() {
             getChar();
         }
         retractChar();
-        num = transNum();
         Token = INTCON;
     } else if (isColon()) {
         catToken();
@@ -173,7 +171,7 @@ int lexAnalysisIm() {
     } else if (isEof())
         return -1;
     else error_lexical();
-    ans = string(token, 0, charPointer);
+    ans = string(token, 0, charPointer);/* NOLINT */
     return 0;
 }
 
@@ -182,7 +180,7 @@ int getChar() {
         Char = '\0';
         return -1;
     }
-    Char = fgetc(testfile);
+    Char = fgetc(testfile);/* NOLINT */
     lastChar = Char;
     return 0;
 }
@@ -298,7 +296,7 @@ int isRbrace() {
 
 void catToken() {
     token[charPointer] = Char;
-    tokenToLower[charPointer] = tolower(Char);
+    tokenToLower[charPointer] = tolower(Char);/* NOLINT */
     charPointer++;
 }
 
@@ -309,24 +307,13 @@ void retractChar() {
 int isReserve() {
     int i = 0;
     for (; i < 15; i++) {
-        string tokenNow(tokenToLower, 0, charPointer);
+        string tokenNow(tokenToLower, 0, charPointer);/* NOLINT */
         string ideTk(reserves[i]);
         if (tokenNow == ideTk) {
             return i;
         }
     }
     return FALSE - 1;
-}
-
-int transNum() {
-    int i = 0;
-    int a = 0;
-    for (; i < charPointer; i++) {
-        if (token[i] - '0' < 0 && '9' - token[i] > 0)
-            break;
-        a = a * 10 + token[i] - '0';
-    }
-    return a;
 }
 
 int isEof() {
