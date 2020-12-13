@@ -24,4 +24,8 @@ void tokenType::iniTokenType(string fName, enum tokenCategory fType) {
     this->type = fType;
 }
 
+void tokenType::changeName(string newName) {
+    this->name = std::move(newName);
+}
+
 tokenType::tokenType() = default;

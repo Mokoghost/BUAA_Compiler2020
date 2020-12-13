@@ -3,6 +3,7 @@
 functionTable functions;//函数符号表
 identityTable globalTable;/* NOLINT */
 int num;
+int label_num;
 //char syntaxCategoryString[37][40]
 //        = {
 //                "<字符串>", "<程序>", "<常量说明>", "<常量定义>", "<无符号整数>", "<整数>", "<声明头部>", "<常量>",
@@ -225,6 +226,7 @@ int variableDefineWithoutInitialIm(enum tokenCategory ty, function &fn) {
     Identifier var(name, ty);
     getToken();
     if (Token == LBRACK) {//＜标识符＞'['＜无符号整数＞']'
+        var.setIsArray();
         getToken();
         unsignedInteger(true, 0, 2);
         int d1 = stoi(formerAns.at(formerAns.size() - 1 - tokenPointer).first);//第一维数
@@ -255,6 +257,12 @@ int variableDefineWithoutInitialIm(enum tokenCategory ty, function &fn) {
     var.setIdentifierCategory(VAR);
     if (fn.getName().empty()) {
         globalTable.addToken(var, l);
+        if (var.getTokenCategory() == INTTK)
+            for (int i = 0; i < var.getDimension(1) * var.getDimension(2); i++)
+                var.setValue(0);
+        else
+            for (int i = 0; i < var.getDimension(1) * var.getDimension(2); i++)
+                var.setValue('\0');
     } else
         fn.addToken(var, l);
     return 1;
@@ -319,6 +327,7 @@ int variableDefineWithInitialIm(enum tokenCategory type, function &fn) {
     Identifier var(name, type);
     getToken();
     if (Token == LBRACK) {//若为数组
+        var.setIsArray();
         getToken();
         unsignedInteger(true, 0, 1);
         int d1 = stoi(formerAns.at(formerAns.size() - 1 - tokenPointer).first);//第一维数
@@ -422,6 +431,8 @@ int functionDefineWithReturn(int optional) {//有返回值函数定义
     int l = formerAns.at(formerAns.size() - 1 - tokenPointer).second;
     retractTokens(1);
     statementHead(fn);
+    addSpace();
+    addFunction(fn.getName());
     getToken();//LPARENT
     getToken();
     parametersTable(fn);
@@ -452,6 +463,8 @@ int functionDefineWithoutReturn(int optional) {//无返回值函数定义
     int l = formerAns.at(formerAns.size() - 1 - tokenPointer).second;
     string fName = formerAns.at(formerAns.size() - 1 - tokenPointer).first;
     function fn(fName, VOIDTK);
+    addSpace();
+    addFunction(fName);
     getToken();//LPARENT
     getToken();
     parametersTable(fn);
@@ -465,6 +478,8 @@ int functionDefineWithoutReturn(int optional) {//无返回值函数定义
     compoundStatement(fn);
     getToken();//RBRACE
     functions.addToken(fn, l);
+    if (!fn.returnNum)
+        addQuaternion(vector<string>{"return"});
     //outputAns.emplace_back(syntaxCategoryString[13]);
     return 1;
 }
@@ -491,6 +506,7 @@ int parametersTable(function &fn) {//参数表
         fn.setArgument(arg);
         fn.addToken(arg, l);
         getToken();
+        addQuaternion(vector<string>{"@para", reserves[arg.getTokenCategory() - INTTK + 1], arg.getName()});
         if (Token != COMMA) {
             break;
         }
@@ -512,7 +528,8 @@ int mainFunction() {//主函数
         error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " l");
         retractTokens(1);
     }
-    addQuaternion(vector<string>{"void", "main()"});
+    addSpace();
+    addFunction(mainFunc.getName());
     getToken();//LBRACE
     getToken();
     compoundStatement(mainFunc);
@@ -534,7 +551,7 @@ int expression(function &fn, string &vn) {//表达式
     }
     string vt0;
     ret -= term(fn, vt0);
-    string vt1 = "$t" + to_string(fn.tempNum++);
+    string vt1 = "$t" + to_string(fn.tempNum++) + "_" + fn.getName();
     addQuaternion(vector<string>{vt1, "=", op0, vt0});
     getToken();
     while (Token == PLUS || Token == MINU) {
@@ -542,7 +559,7 @@ int expression(function &fn, string &vn) {//表达式
         getToken();
         string vt2;
         ret -= term(fn, vt2);
-        string vtn = "$t" + to_string(fn.tempNum++);
+        string vtn = "$t" + to_string(fn.tempNum++) + "_" + fn.getName();
         addQuaternion(vector<string>{vtn, "=", vt1, op, vt2});
         vt1 = vtn;
         getToken();
@@ -563,7 +580,7 @@ int term(function &fn, string &vn) {//项
         getToken();
         string vt2;
         ret += factor(fn, vt2);
-        string vtn = "$t" + to_string(fn.tempNum++);
+        string vtn = "$t" + to_string(fn.tempNum++) + "_" + fn.getName();
         addQuaternion(vector<string>{vtn, "=", vt1, op, vt2});
         vt1 = vtn;
         vn = vtn;
@@ -618,7 +635,11 @@ int factor(function &fn, string &vn) {//因子
             }
         } else if (Token == LPARENT) {//＜有返回值函数调用语句＞
             retractTokens(1);
+            string vtn = "$t" + to_string(fn.tempNum++) + "_" + fn.getName();
+            string fName = formerAns.at(formerAns.size() - 1 - tokenPointer).first;
+            vn = vtn;
             functionCallStatementWithReturn(fn);
+            addQuaternion(vector<string>{vtn, "=", "@RET_" + fName});
         } else {
             retractTokens(1);
             vn = idName;
@@ -626,6 +647,9 @@ int factor(function &fn, string &vn) {//因子
     } else if (Token == LPARENT) {//'('＜表达式＞')'
         getToken();
         expression(fn, vn);
+        if (vn.at(0) == '\'') {
+            vn = to_string(vn.at(1) - 'a' + 97);
+        }
         getToken();
         if (Token != RPARENT) {
             error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " l");
@@ -704,7 +728,7 @@ int assignmentStatement(int optional, function &fn) {//赋值语句
             if (expression(fn, vt2) == 2) {
                 error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " i");
             }
-            addQuaternion(vector<string>{idName, "[" + vt1 + "]", "=", vt2});
+            addQuaternion(vector<string>{idName + "[" + vt1 + "]", "=", vt2});
         } else if (Token == LBRACK) {//'['＜表达式＞']''['＜表达式＞']' =＜表达式＞
             getToken();
             string vt2;
@@ -720,7 +744,7 @@ int assignmentStatement(int optional, function &fn) {//赋值语句
             getToken();
             string vt3;
             expression(fn, vt3);
-            addQuaternion(vector<string>{idName, "[" + vt1 + "]", "[" + vt2 + "]", "=", vt3});
+            addQuaternion(vector<string>{idName + "[" + vt1 + "]" + "[" + vt2 + "]", "=", vt3});
         }
     } else {}//impossible to reach
     //outputAns.emplace_back(syntaxCategoryString[21]);
@@ -732,9 +756,14 @@ int conditionStatement(int optional, function &fn) {//条件语句
         if (Token != IFTK)
             return 0;
     //Token == IFTK
+    bool hasElse = false;
     getToken();//LPARENT
     getToken();
-    condition(fn);
+    int condition_num = ++label_num;
+    string label_condition_else = "@Label_condition_else" + to_string(condition_num);
+    string label_condition_end = "@Label_condition_end" + to_string(condition_num);
+    vector<vector<string>> intermediateInner;
+    condition(fn, label_condition_else, intermediateInner);
     getToken();
     if (Token != RPARENT) {
         error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " l");
@@ -743,27 +772,40 @@ int conditionStatement(int optional, function &fn) {//条件语句
     getToken();
     statement(0, fn);
     getToken();
+    addQuaternion(vector<string>{"@j", label_condition_end});
     if (Token == ELSETK) {
         getToken();
+        hasElse = true;
+        addQuaternion(vector<string>{label_condition_else + ":"});
         statement(0, fn);
     } else retractTokens(1);
+    if (!hasElse)
+        addQuaternion(vector<string>{label_condition_else + ":"});
+    addQuaternion(vector<string>{label_condition_end + ":"});
+    addSpace();
     //outputAns.emplace_back(syntaxCategoryString[22]);
     return 1;
 }
 
-int condition(function &fn) {//条件
+vector<string>
+condition(function &fn, string &label, vector<vector<string>> &intermediateInner) {//条件
+    int pos1 = intermediateCodeInner.size();
     string vt1;
     if (expressTypeEqual(expression(fn, vt1), CHARTK)) {
         error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " f");
     }
     getToken();//isRelation();
+    enum tokenCategory relation = Token;
     getToken();
     string vt2;
     if (expressTypeEqual(expression(fn, vt2), CHARTK)) {
         error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " f");
     }
+    for (int i = pos1; i < intermediateCodeInner.size(); i++) {
+        intermediateInner.push_back(intermediateCodeInner.at(i));
+    }
     //outputAns.emplace_back(syntaxCategoryString[23]);
-    return 1;
+    return addCondition(vt1, vt2, label, relation);
 }
 
 int loopStatement(int optional, function &fn) {//循环语句
@@ -773,15 +815,34 @@ int loopStatement(int optional, function &fn) {//循环语句
     if (Token == WHILETK) {
         getToken();//LPARENT
         getToken();
-        condition(fn);
+        int while_num = ++label_num;
+        string label_while_start = "@Label_while_start" + to_string(while_num);
+        string label_while_end = "@Label_while_end" + to_string(while_num);
+        string label_while_entry = "@Label_while_entry" + to_string(while_num);
+        addQuaternion(vector<string>{label_while_start + ":"});
+        vector<vector<string>> intermediateInner;
+        vector<string> quaternion =
+                condition(fn, label_while_end, intermediateInner);
         getToken();
         if (Token != RPARENT) {
             error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " l");
             retractTokens(1);
         }
         getToken();
+        addQuaternion(vector<string>{label_while_entry + ":"});
         statement(0, fn);
+        quaternion.emplace_back(label_while_entry);
+        addQuaternions(intermediateInner);
+        vector<string> revQuaternion = reverseRelation(quaternion);
+        addQuaternion(revQuaternion);
+        addQuaternion(vector<string>{label_while_end + ":"});
+        addSpace();
     } else if (Token == FORTK) {
+        int for_num = ++label_num;
+        string label_for_start = "@Label_for_start" + to_string(for_num);
+        string label_for_entry = "@Label_for_entry" + to_string(for_num);
+        string label_for_end = "@Label_for_end" + to_string(for_num);
+        addQuaternion(vector<string>{label_for_start + ":"});
         getToken();//LPARENT
         getToken();
         string idName = formerAns.at(formerAns.size() - 1 - tokenPointer).first;
@@ -792,13 +853,16 @@ int loopStatement(int optional, function &fn) {//循环语句
         getToken();
         string vt1;
         expression(fn, vt1);
+        addQuaternion(vector<string>{idName, "=", vt1});
         getToken();
         if (Token != SEMICN) {
             error_syntax(to_string(formerAns.at(formerAns.size() - 2 - tokenPointer).second) + " k");//应为分号
             retractTokens(1);
         }
         getToken();
-        condition(fn);
+        vector<vector<string>> intermediateInner;
+        vector<string> quaternion =
+                condition(fn, label_for_end, intermediateInner);
         getToken();
         if (Token != SEMICN) {
             error_syntax(to_string(formerAns.at(formerAns.size() - 2 - tokenPointer).second) + " k");//应为分号
@@ -816,27 +880,46 @@ int loopStatement(int optional, function &fn) {//循环语句
             error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " c");
         }
         getToken();//Token == PLUS || Token == MINU
+        string op;
+        if (Token == PLUS)
+            op = "+";
+        else
+            op = "-";
         getToken();
-        stride();
+        string step = stride();
         getToken();
         if (Token != RPARENT) {
             error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " l");
             retractTokens(1);
         }
         getToken();
+        addQuaternion(vector<string>{label_for_entry + ":"});
         statement(0, fn);
+        addQuaternion(vector<string>{idName, "=", idName, op, step});
+        quaternion.emplace_back(label_for_entry);
+        addQuaternions(intermediateInner);
+        vector<string> revQuaternion = reverseRelation(quaternion);
+        addQuaternion(revQuaternion);
+        addQuaternion(vector<string>{label_for_end + ":"});
+        addSpace();
     } else {}//impossible to reach
     //outputAns.emplace_back(syntaxCategoryString[24]);
     return 1;
 }
 
-int stride() {//步长
+string stride() {//步长
     unsignedInteger(true, 0, 1);
     //outputAns.emplace_back(syntaxCategoryString[25]);
-    return 1;
+    return formerAns.at(formerAns.size() - 1 - tokenPointer).first;
 }
 
 int switchStatement(function &fn) {//情况语句
+    int switch_num = ++label_num;
+    string label_switch_start = "@Label_switch_start" + to_string(switch_num);
+    string label_switch_entry = "@Label_switch_entry" + to_string(switch_num);
+    string label_switch_end = "@Label_switch_end" + to_string(switch_num);
+    string label_switch = "@Label_switch" + to_string(switch_num);
+    addQuaternion(vector<string>{label_switch_start + ":"});
     int ret;
     //Token == SWITCHTK
     getToken();//LPARENT
@@ -855,18 +938,24 @@ int switchStatement(function &fn) {//情况语句
     }
     getToken();//LBRACE
     getToken();
-    caseTable(fn, type);
+    caseTable(fn, type, vt1, label_switch, label_switch_end);
     getToken();
     defaultStatement(fn);
     getToken();//RBRACE
+    addQuaternion(vector<string>{label_switch_end + ":"});
+    addSpace();
     //outputAns.emplace_back(syntaxCategoryString[26]);
     return 1;
 }
 
-int caseTable(function &fn, enum tokenCategory type) {//情况表
-    caseStatement(0, fn, type);
+int caseTable(function &fn, enum tokenCategory type, string &vt1, string &label_switch, string &label_switch_end) {//情况表
+    string label = label_switch + "_case1_end";
+    int case_num = 2;
+    caseStatement(0, fn, type, vt1, label, label_switch_end);
     getToken();
-    while (caseStatement(1, fn, type)) {
+    label = label_switch + "_case" + to_string(case_num) + "_end";
+    while (caseStatement(1, fn, type, vt1, label, label_switch_end)) {
+        label = label_switch + "_case" + to_string(++case_num) + "_end";
         getToken();
     }
     retractTokens(1);
@@ -874,7 +963,8 @@ int caseTable(function &fn, enum tokenCategory type) {//情况表
     return 1;
 }
 
-int caseStatement(int optional, function &fn, enum tokenCategory type) {//情况子语句
+int caseStatement(int optional, function &fn, enum tokenCategory type,
+                  string &vt1, string &label_switch, string &label_switch_end) {//情况子语句
     if (optional)
         if (Token != CASETK)
             return 0;
@@ -886,9 +976,18 @@ int caseStatement(int optional, function &fn, enum tokenCategory type) {//情况
             error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " o");
         }
     }
+    string con;
+    if (constRet == 1) {
+        con = to_string(num);
+    } else {
+        con = "\'" + formerAns.at(formerAns.size() - 1 - tokenPointer).first + "\'";
+    }
     getToken();//COLON
     getToken();
+    addQuaternion(vector<string>{"@bne", vt1, con, label_switch});
     statement(0, fn);
+    addQuaternion(vector<string>{"@j", label_switch_end});
+    addQuaternion(vector<string>{label_switch + ":"});
     //outputAns.emplace_back(syntaxCategoryString[28]);
     return 1;
 }
@@ -916,7 +1015,7 @@ void findRparent(int lackP) {//寻找右括号
     }
 }
 
-int functionCallStatementWithReturn(function &caller) {//有返回值函数调用语句
+int functionCallStatementIml(function &caller) {//函数调用语句实现
     string idName = formerAns.at(formerAns.size() - 1 - tokenPointer).first;
     if (!functions.contains(idName) && caller.getName() != idName) {
         error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " c");
@@ -937,33 +1036,26 @@ int functionCallStatementWithReturn(function &caller) {//有返回值函数调�
         error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " l");
         retractTokens(1);
     }
-    //outputAns.emplace_back(syntaxCategoryString[30]);
+    addQuaternion(vector<string>{"@call", fn.getName()});
     return 1;
+}
+
+int functionCallStatementWithReturn(function &caller) {//有返回值函数调用语句
+    int ret = functionCallStatementIml(caller);
+    //outputAns.emplace_back(syntaxCategoryString[30]);
+    return ret;
 }
 
 int functionCallStatementWithoutReturn(function &caller) {//无返回值函数调用语句
-    if (!functions.contains(formerAns.at(formerAns.size() - 1 - tokenPointer).first)) {
-        error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " c");
-        getToken();//LPARENT
-        findRparent(1);
-        return 0;
-    }
-    function fn = functions.getToken(formerAns.at(formerAns.size() - 1 - tokenPointer).first);
-    getToken();//LPARENT
-    getToken();
-    valueParameterTable(fn, caller);
-    getToken();
-    if (Token != RPARENT) {
-        error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " l");
-        retractTokens(1);
-    }
+    int ret = functionCallStatementIml(caller);
     //outputAns.emplace_back(syntaxCategoryString[31]);
-    return 1;
+    return ret;
 }
 
 int valueParameterTable(function &fn, function &caller) {//值参数表
+    vector<string> pushArgs;
     int argNum = fn.getArgumentNum();
-    if (Token == SEMICN && !argNum) {
+    if (Token == SEMICN && !argNum) {//我也不记得这个是啥情况
         retractTokens(1);
         //outputAns.emplace_back(syntaxCategoryString[32]);
         return 0;
@@ -978,6 +1070,7 @@ int valueParameterTable(function &fn, function &caller) {//值参数表
     }
     if (Token == RPARENT && !argNum) {
         retractTokens(1);
+        addQuaternion(vector<string>{"@call_start", fn.getName()});
         //outputAns.emplace_back(syntaxCategoryString[32]);
         return 0;
     }
@@ -989,12 +1082,14 @@ int valueParameterTable(function &fn, function &caller) {//值参数表
             error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " e");
         }
     }
+    pushArgs.push_back(vt1);
     count++;
     getToken();
     while (Token == COMMA) {
         getToken();
         string vt2;
         expRet = expression(caller, vt2);
+        pushArgs.push_back(vt2);
         if (expRet >= 0) {
             if (!expressTypeEqual(expRet, fn.getArg(0).getTokenCategory())) {
                 error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " e");
@@ -1003,6 +1098,9 @@ int valueParameterTable(function &fn, function &caller) {//值参数表
         getToken();
         count++;
     }
+    addQuaternion(vector<string>{"@call_start", fn.getName()});
+    for (auto &arg:pushArgs)
+        addQuaternion(vector<string>{"@push", arg});
     if (count != argNum) {
         error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " d");
     }
@@ -1039,7 +1137,7 @@ int readStatement(int optional, function &fn) {//读语句
         (gtContains && globalTable.getToken(idName).getIdCategory() == CONST)) {
         error_syntax(to_string(idLine) + " j");
     }
-    addQuaternion(vector<string>{"scan", idName});
+    addQuaternion(vector<string>{"@scan", idName});
     getToken();
     if (Token != RPARENT) {
         error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " l");
@@ -1057,13 +1155,15 @@ int printStatement(int optional, function &fn) {//写语句
     getToken();//LPARENT
     getToken();
     if (String(1)) {
-        string strIndex = "#str" + to_string(strNum++);
-        strings.insert(pair<string, string>(strIndex,
-                                            formerAns.at(formerAns.size() - 1 - tokenPointer).first));
+        string strIndex = "#xpystr" + to_string(strNum++);
+        string string1 = formerAns.at(formerAns.size() - 1 - tokenPointer).first;
+        if(string1.find('\\')!=string::npos)
+            string1.replace(string1.find('\\'),1,"\\\\");
+        strings.insert(pair<string, string>(strIndex,string1));
         string str = strIndex;
         getToken();
         if (Token == RPARENT) {
-            addQuaternion(vector<string>{"print", str});
+            addQuaternion(vector<string>{"@print", str});
         } else if (Token == COMMA) {
             getToken();
             string vt1;
@@ -1073,7 +1173,7 @@ int printStatement(int optional, function &fn) {//写语句
                 error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " l");
                 retractTokens(1);
             }
-            addQuaternion(vector<string>{"print", str, vt1});
+            addQuaternion(vector<string>{"@print", str, vt1});
         }
     } else {
         string vt1;
@@ -1083,13 +1183,14 @@ int printStatement(int optional, function &fn) {//写语句
             error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " l");
             retractTokens(1);
         }
-        addQuaternion(vector<string>{"print", vt1});
+        addQuaternion(vector<string>{"@print", vt1});
     }
     //outputAns.emplace_back(syntaxCategoryString[35]);
     return 1;
 }
 
 int returnStatement(function &fn) {//返回语句
+    fn.returnNum++;
     getToken();
     if (fn.isEqualType(VOIDTK) && Token == LPARENT) {
         error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " g");
@@ -1100,28 +1201,28 @@ int returnStatement(function &fn) {//返回语句
     if (!fn.isEqualType(VOIDTK) && Token == SEMICN) {
         error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " h");
         retractTokens(1);
-        fn.returnNum++;
         return 0;
     }
     if (Token == LPARENT) {
         getToken();
         if (Token == RPARENT) {
             error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " h");
-            fn.returnNum++;
             //outputAns.emplace_back(syntaxCategoryString[36]);
             return 1;
         }
         string vt1;
         if (!expressTypeEqual(expression(fn, vt1), fn.getTokenCategory()))
             error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " h");
-        fn.returnNum++;
         getToken();
         if (Token != RPARENT) {
             error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " l");
             retractTokens(1);
         }
+        addQuaternion(vector<string>{"return", vt1});
+        return 1;
     } else retractTokens(1);
     //outputAns.emplace_back(syntaxCategoryString[36]);
+    addQuaternion(vector<string>{"return"});
     return 1;
 }
 
@@ -1289,8 +1390,10 @@ bool isCharExp(function &fn, string &vn) {
                 if (!isOperation()) {
                     retractToToken(pos);
                     function fn2 = functions.getToken(formerAns.at(pos).first);
-                    functionCallStatementWithReturn(fn2);
-                    vn = "RET_" + fn2.getName();
+                    string vtn = "$t" + to_string(fn.tempNum++) + "_" + fn.getName();
+                    functionCallStatementWithReturn(fn);
+                    addQuaternion(vector<string>{vtn, "=", "@RET_" + fn2.getName()});
+                    vn = vtn;
                     // retractTokens(1);
                     return true;
                 }
@@ -1381,4 +1484,61 @@ int isOperation() {
     if (Token == PLUS || Token == MINU || Token == MULT || Token == DIV)
         return 1;
     return 0;
+}
+
+vector<string> addCondition(string &vt1, string &vt2, string &label, enum tokenCategory op) {
+    vector<string> quaternion;
+    switch (op) {
+        case LSS: {
+            quaternion = {"@bge", vt1, vt2};
+            addQuaternion(vector<string>{"@bge", vt1, vt2, label});
+            break;
+        }
+        case LEQ: {
+            quaternion = {"@blt", vt2, vt1};
+            addQuaternion(vector<string>{"@blt", vt2, vt1, label});
+            break;
+        }
+        case GEQ: {
+            quaternion = {"@blt", vt1, vt2};
+            addQuaternion(vector<string>{"@blt", vt1, vt2, label});
+            break;
+        }
+        case GRE: {
+            quaternion = {"@bge", vt2, vt1};
+            addQuaternion(vector<string>{"@bge", vt2, vt1, label});
+            break;
+        }
+        case EQL: {
+            quaternion = {"@bne", vt1, vt2};
+            addQuaternion(vector<string>{"@bne", vt1, vt2, label});
+            break;
+        }
+        case NEQ: {
+            quaternion = {"@beq", vt1, vt2};
+            addQuaternion(vector<string>{"@beq", vt1, vt2, label});
+            break;
+        }
+        default:
+            break;
+    }
+    return quaternion;
+}
+
+vector<string> reverseRelation(vector<string> quaternion) {
+    vector<string> vector;
+    string relation = quaternion.at(0);
+    if (relation == "@bge") {
+        vector.emplace_back("@blt");
+    } else if (relation == "@blt") {
+        vector.emplace_back("@bge");
+    } else if (relation == "@bne") {
+        vector.emplace_back("@beq");
+    } else {
+        vector.emplace_back("@bne");
+    }
+    vector.push_back(quaternion.at(1));
+    vector.push_back(quaternion.at(2));
+    vector.push_back(quaternion.at(3));
+    return vector;
 }

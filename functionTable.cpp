@@ -23,3 +23,17 @@ bool functionTable::contains(const string &name) {
     else
         return true;
 }
+
+void functionTable::changeSameNames() {
+    for (auto &fn:tokens) {
+        fn.second.replaceSameName();
+    }
+}
+
+void functionTable::addGlobalVarUsed(const string &fnName, const string &varName) {
+    string fName = fnName;
+    string vName= varName;
+    transform(fName.begin(), fName.end(), fName.begin(), ::tolower);
+    transform(vName.begin(), vName.end(), vName.begin(), ::tolower);
+    tokens.at(fName).addGlobalVarUsed(vName);
+}

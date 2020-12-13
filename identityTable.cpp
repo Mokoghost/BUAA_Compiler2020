@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "compiler.h"
 
 void identityTable::addToken(Identifier &token, int l) {
@@ -28,8 +30,12 @@ map<string, Identifier> identityTable::getTokens() {
     return tokens;
 }
 
-void identityTable::varChange(string varName) {
-    this->tokens.at(varName).change();
+void identityTable::changeTokenName(const string &origin, const string &replace) {
+    tokens.at(origin).changeName(replace);
+    string replaceNeo = replace;
+    transform(replaceNeo.begin(), replaceNeo.end(), replaceNeo.begin(), ::tolower);
+    tokens.insert(pair<string, Identifier>(replaceNeo, tokens.at(origin)));
+    tokens.erase(origin);
 }
 
 identityTable::identityTable() = default;
