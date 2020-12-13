@@ -1,6 +1,6 @@
 #include "compiler.h"
 
-FILE *testfile = fopen("testfile1.txt", "r");/* NOLINT */
+FILE *testfile = fopen("testfile.txt", "r");/* NOLINT */
 ifstream in("testfile.txt");
 ofstream out("output.txt");/* NOLINT */
 ofstream err("error.txt");/* NOLINT */
