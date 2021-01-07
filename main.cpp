@@ -1,7 +1,6 @@
 #include "compiler.h"
 
 FILE *testfile = fopen("testfile.txt", "r");/* NOLINT */
-ifstream in("testfile.txt");
 ofstream out("output.txt");/* NOLINT */
 ofstream err("error.txt");/* NOLINT */
 ofstream midGross("18373647_xpy_before_optimize.txt");/* NOLINT */
@@ -11,26 +10,29 @@ ofstream mipsTest("mips.asm");/* NOLINT */
 
 int main() {
     synAnalysis();
-    copyPropagation();
-    copyPropagation();
-    multiSimplifier();
-    copyPropagation();
-    changeSameName();
-    counterTempVar();
-    allocateRegisterForGlobalVar();
-    outputIntermediateCode();
-    for (auto &outputAn : outputErr) {
-        err << outputAn << endl;
-    }
-    for (auto &outputAn : intermediateCode) {
-        midGross << outputAn << endl;
-    }
-    generateMIPSAssembly();
-    for (auto &outputAn : mipsCode) {
-        mips << outputAn << endl;
-    }
-    for (auto &outputAn : mipsCode) {
-        mipsTest << outputAn << endl;
+    if (outputErr.empty()) {
+        copyPropagation();
+        copyPropagation();
+        multiSimplifier();
+        copyPropagation();
+        changeSameName();
+        counterTempVar();
+        allocateRegisterForGlobalVar();
+        outputIntermediateCode();
+        for (auto &outputAn : intermediateCode) {
+            midGross << outputAn << endl;
+        }
+        generateMIPSAssembly();
+        for (auto &outputAn : mipsCode) {
+            mips << outputAn << endl;
+        }
+        for (auto &outputAn : mipsCode) {
+            mipsTest << outputAn << endl;
+        }
+    } else {
+        for (auto &outputAn : outputErr) {
+            err << outputAn << endl;
+        }
     }
     fclose(testfile);
     out.close();

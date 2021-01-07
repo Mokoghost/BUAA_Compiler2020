@@ -703,7 +703,7 @@ int assignmentStatement(int optional, function &fn) {//赋值语句
         error_syntax(to_string(idLine) + " c");
     }
     if ((fnContains && fn.getToken(idName).getIdCategory() == CONST) ||
-        (gtContains && globalTable.getToken(idName).getIdCategory() == CONST)) {
+        (!fnContains && gtContains && globalTable.getToken(idName).getIdCategory() == CONST)) {
         error_syntax(to_string(idLine) + " j");
     }
     getToken();
@@ -725,9 +725,7 @@ int assignmentStatement(int optional, function &fn) {//赋值语句
         if (Token == ASSIGN) {//'['＜表达式＞']'=＜表达式＞
             getToken();
             string vt2;
-            if (expression(fn, vt2) == 2) {
-                error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " i");
-            }
+            expression(fn, vt2);
             addQuaternion(vector<string>{idName + "[" + vt1 + "]", "=", vt2});
         } else if (Token == LBRACK) {//'['＜表达式＞']''['＜表达式＞']' =＜表达式＞
             getToken();
@@ -1091,7 +1089,7 @@ int valueParameterTable(function &fn, function &caller) {//值参数表
         expRet = expression(caller, vt2);
         pushArgs.push_back(vt2);
         if (expRet >= 0) {
-            if (!expressTypeEqual(expRet, fn.getArg(0).getTokenCategory())) {
+            if (!expressTypeEqual(expRet, fn.getArg(count).getTokenCategory())) {
                 error_syntax(to_string(formerAns.at(formerAns.size() - 1 - tokenPointer).second) + " e");
             }
         }
@@ -1134,7 +1132,7 @@ int readStatement(int optional, function &fn) {//读语句
         error_syntax(to_string(idLine) + " c");
     }
     if ((fnContains && fn.getToken(idName).getIdCategory() == CONST) ||
-        (gtContains && globalTable.getToken(idName).getIdCategory() == CONST)) {
+        (!fnContains && gtContains && globalTable.getToken(idName).getIdCategory() == CONST)) {
         error_syntax(to_string(idLine) + " j");
     }
     addQuaternion(vector<string>{"@scan", idName});
@@ -1157,9 +1155,9 @@ int printStatement(int optional, function &fn) {//写语句
     if (String(1)) {
         string strIndex = "#xpystr" + to_string(strNum++);
         string string1 = formerAns.at(formerAns.size() - 1 - tokenPointer).first;
-        if(string1.find('\\')!=string::npos)
-            string1.replace(string1.find('\\'),1,"\\\\");
-        strings.insert(pair<string, string>(strIndex,string1));
+        if (string1.find('\\') != string::npos)
+            string1.replace(string1.find('\\'), 1, "\\\\");
+        strings.insert(pair<string, string>(strIndex, string1));
         string str = strIndex;
         getToken();
         if (Token == RPARENT) {

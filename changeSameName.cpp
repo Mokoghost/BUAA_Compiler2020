@@ -18,7 +18,11 @@ void changeSameName() {
                         replace.push_back(inter.at(size - 1 - j));
                         inter.pop_back();
                     }
-                    inter.push_back(fn.getReplaceName(real));
+                    string replacement = fn.getReplaceName(real);
+                    if (element != real) {
+                        replacement += element.substr(real.size(), element.size() - real.size());
+                    }
+                    inter.push_back(replacement);
                     size = replace.size();
                     for (int j = 1; j < size; j++) {
                         inter.push_back(replace.at(size - 1 - j));

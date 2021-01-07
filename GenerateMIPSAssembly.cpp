@@ -80,8 +80,10 @@ void allocateMemory() {
     for (auto &token : globalTable.getTokens()) {
         int space = token.second.getSize();
         mipsCode.emplace_back(token.second.getName() + ": " + ".space" + " " + to_string(space));
-        var2mem.insert(pair<string, int>(token.second.getName(), memoryPointer));
-        mem2var.insert(pair<int, string>(memoryPointer, token.second.getName()));
+        string name = token.second.getName();
+        transform(name.begin(), name.end(), name.begin(), ::tolower);
+        var2mem.insert(pair<string, int>(name, memoryPointer));
+        mem2var.insert(pair<int, string>(memoryPointer, name));
         memoryPointer += space;
     }
     for (auto &str:strings) {
@@ -96,7 +98,9 @@ void allocateMemory() {
 void generateInitializeMemory() {
     for (auto &token : globalTable.getTokens()) {
         if (token.second.initialized) {
-            int memAddress = var2mem.at(token.second.getName());
+            string name = token.second.getName();
+            transform(name.begin(), name.end(), name.begin(), ::tolower);
+            int memAddress = var2mem.at(name);
             for (int i = 0; i < token.second.getSize() / 4; i++) {
                 stringstream stream;
                 stream << "0x" << hex << memAddress + i * 4;
@@ -198,7 +202,9 @@ void variableArrangeRegisterIm(function &fn, string &varName, enum varType type)
     fn.setRegToVar(varName, Reg(regPointer));
     usedRegister[regPointer] = true;
     if (type == GLOBAL_VAR) {
-        int memAddress = var2mem.at(varName);
+        string name = varName;
+        transform(name.begin(), name.end(), name.begin(), ::tolower);
+        int memAddress = var2mem.at(name);
         stringstream stream;
         stream << "0x" << hex << memAddress;
         mipsCode.emplace_back("lw " + reg2str.at(regPointer) + " " + stream.str());
@@ -370,7 +376,9 @@ void setValueOfVarArray(string &varName, string &varName1, function &fn, Identif
                 mipsCode.emplace_back("addu $t8 $t8 $sp");
             } else {//全局数组变量存于堆中
                 stringstream stream2;
-                int base = var2mem.at(varName1);
+                string name = varName1;
+                transform(name.begin(), name.end(), name.begin(), ::tolower);
+                int base = var2mem.at(name);
                 stream2 << "0x" << hex << base;
                 mipsCode.emplace_back("li $t9 " + stream2.str());
                 mipsCode.emplace_back("addu $t8 $t9 $t8");
@@ -400,7 +408,9 @@ void setValueOfVarArray(string &varName, string &varName1, function &fn, Identif
                 mipsCode.emplace_back("addu $t8 $t8 $sp");
             } else {//全局数组变量存于堆中
                 stringstream stream2;
-                int base = var2mem.at(varName1);
+                string name = varName1;
+                transform(name.begin(), name.end(), name.begin(), ::tolower);
+                int base = var2mem.at(name);
                 stream2 << "0x" << hex << base;
                 mipsCode.emplace_back("li $t9 " + stream2.str());
                 mipsCode.emplace_back("addu $t8 $t9 $t8");
@@ -421,7 +431,9 @@ void setValueOfVarArray(string &varName, string &varName1, function &fn, Identif
                 mipsCode.emplace_back("addu $t8 $t8 $sp");
             } else {//全局数组变量存于堆中
                 stringstream stream2;
-                int base = var2mem.at(varName1);
+                string name = varName1;
+                transform(name.begin(), name.end(), name.begin(), ::tolower);
+                int base = var2mem.at(name);
                 stream2 << "0x" << hex << base;
                 mipsCode.emplace_back("li $t9 " + stream2.str());
                 mipsCode.emplace_back("addu $t8 $t9 $t8");
@@ -453,7 +465,9 @@ void setValueOfVarArray(string &varName, string &varName1, function &fn, Identif
                 mipsCode.emplace_back("addu $t8 $t8 $sp");
             } else {//全局数组变量存于堆中
                 stringstream stream2;
-                int base = var2mem.at(varName1) + d1 * var.getDimension(2) * 4;
+                string name = varName1;
+                transform(name.begin(), name.end(), name.begin(), ::tolower);
+                int base = var2mem.at(name) + d1 * var.getDimension(2) * 4;
                 stream2 << "0x" << hex << base;
                 mipsCode.emplace_back("li $t9 " + stream2.str());
                 mipsCode.emplace_back("addu $t8 $t9 $t8");
@@ -489,7 +503,9 @@ void setValueOfVarArray(string &varName, string &varName1, function &fn, Identif
                 mipsCode.emplace_back("addu $t8 $t8 $sp");
             } else {//全局数组变量存于堆中
                 stringstream stream2;
-                int base = var2mem.at(varName1);
+                string name = varName1;
+                transform(name.begin(), name.end(), name.begin(), ::tolower);
+                int base = var2mem.at(name);
                 stream2 << "0x" << hex << base;
                 mipsCode.emplace_back("li $t9 " + stream2.str());
                 mipsCode.emplace_back("addu $t8 $t9 $t8");
@@ -558,7 +574,9 @@ void setValueOfVarArray(string &varName, string &varName1, function &fn, Identif
                 mipsCode.emplace_back("addu $t8 $t8 $sp");
             } else {//全局数组变量存于堆中
                 stringstream stream2;
-                int base = var2mem.at(varName1);
+                string name = varName1;
+                transform(name.begin(), name.end(), name.begin(), ::tolower);
+                int base = var2mem.at(name);
                 stream2 << "0x" << hex << base;
                 mipsCode.emplace_back("li $t9 " + stream2.str());
                 mipsCode.emplace_back("addu $t8 $t9 $t8");
@@ -595,7 +613,9 @@ void generateCalculateStatement(function &fn, vector<string> &inter) {
                 }
                 if (vt[1] == "$t9" && pointer == 2 && inter.size() == 5) {
                     string varName2 = getRealName(inter.at(4), '[');
-                    if (fn.stackHasVar(varName2) || var2mem.count(varName2) != 0) {//后面可能会覆盖$t9
+                    string name = varName2;
+                    transform(name.begin(), name.end(), name.begin(), ::tolower);
+                    if (fn.stackHasVar(varName2) || var2mem.count(name) != 0) {//后面可能会覆盖$t9
                         if (!v1) {
                             mipsCode.emplace_back("la $v1 ($t9)");
                             v1 = true;
@@ -1047,16 +1067,20 @@ string getValueOfVarIml(function &fn, string &varName, string &varName1, Identif
                 return stream.str();
             }
         } else {
+            string name = varName1;
+            transform(name.begin(), name.end(), name.begin(), ::tolower);
             if (fn.varHasReg(varName1)) {//寄存器中存在
                 return reg2str.at(fn.getRegOfVar(varName1, true));
-            } else if (fn.stackHasVar(varName1) || var2mem.count(varName1) != 0) {//堆或栈中存在
+            } else if (fn.stackHasVar(varName1) || var2mem.count(name) != 0) {//堆或栈中存在
                 int offset;
                 if (fn.stackHasVar(varName1)) {
                     offset = fn.getOffSet(varName1);
                     mipsCode.emplace_back("lw $t9 " + to_string(offset) + "($sp)");
                 } else {
                     stringstream stream2;
-                    offset = var2mem.at(varName);
+                    string name0 = varName;
+                    transform(name0.begin(), name0.end(), name0.begin(), ::tolower);
+                    offset = var2mem.at(name0);
                     stream2 << "0x" << hex << offset;
                     mipsCode.emplace_back("lw $t9 " + stream2.str());
                 }
@@ -1085,7 +1109,9 @@ string getValueOfVarIml(function &fn, string &varName, string &varName1, Identif
                     mipsCode.emplace_back("addu $t8 $t8 $sp");
                 } else {//全局数组变量存于堆中
                     stringstream stream2;
-                    int base = var2mem.at(varName1);
+                    string name0 = varName1;
+                    transform(name0.begin(), name0.end(), name0.begin(), ::tolower);
+                    int base = var2mem.at(name0);
                     stream2 << "0x" << hex << base;
                     mipsCode.emplace_back("li $t9 " + stream2.str());
                     mipsCode.emplace_back("addu $t8 $t9 $t8");
@@ -1117,7 +1143,9 @@ string getValueOfVarIml(function &fn, string &varName, string &varName1, Identif
                     mipsCode.emplace_back("addu $t8 $t8 $sp");
                 } else {//全局数组变量存于堆中
                     stringstream stream2;
-                    int base = var2mem.at(varName1);
+                    string name0 = varName1;
+                    transform(name0.begin(), name0.end(), name0.begin(), ::tolower);
+                    int base = var2mem.at(name0);
                     stream2 << "0x" << hex << base;
                     mipsCode.emplace_back("li $t9 " + stream2.str());
                     mipsCode.emplace_back("addu $t8 $t9 $t8");
@@ -1140,7 +1168,9 @@ string getValueOfVarIml(function &fn, string &varName, string &varName1, Identif
                     mipsCode.emplace_back("addu $t8 $t8 $sp");
                 } else {//全局数组变量存于堆中
                     stringstream stream2;
-                    int base = var2mem.at(varName1);
+                    string name0 = varName1;
+                    transform(name0.begin(), name0.end(), name0.begin(), ::tolower);
+                    int base = var2mem.at(name0);
                     stream2 << "0x" << hex << base;
                     mipsCode.emplace_back("li $t9 " + stream2.str());
                     mipsCode.emplace_back("addu $t8 $t9 $t8");
@@ -1174,7 +1204,9 @@ string getValueOfVarIml(function &fn, string &varName, string &varName1, Identif
                     mipsCode.emplace_back("addu $t8 $t8 $sp");
                 } else {//全局数组变量存于堆中
                     stringstream stream2;
-                    int base = var2mem.at(varName1) + d1 * var.getDimension(2) * 4;
+                    string name0 = varName1;
+                    transform(name0.begin(), name0.end(), name0.begin(), ::tolower);
+                    int base = var2mem.at(name0) + d1 * var.getDimension(2) * 4;
                     stream2 << "0x" << hex << base;
                     mipsCode.emplace_back("li $t9 " + stream2.str());
                     mipsCode.emplace_back("addu $t8 $t9 $t8");
@@ -1212,7 +1244,9 @@ string getValueOfVarIml(function &fn, string &varName, string &varName1, Identif
                     mipsCode.emplace_back("addu $t8 $t8 $sp");
                 } else {//全局数组变量存于堆中
                     stringstream stream2;
-                    int base = var2mem.at(varName1);
+                    string name0 = varName1;
+                    transform(name0.begin(), name0.end(), name0.begin(), ::tolower);
+                    int base = var2mem.at(name0);
                     stream2 << "0x" << hex << base;
                     mipsCode.emplace_back("li $t9 " + stream2.str());
                     mipsCode.emplace_back("addu $t8 $t9 $t8");
@@ -1283,7 +1317,9 @@ string getValueOfVarIml(function &fn, string &varName, string &varName1, Identif
                     mipsCode.emplace_back("addu $t8 $t8 $sp");
                 } else {//全局数组变量存于堆中
                     stringstream stream2;
-                    int base = var2mem.at(varName1);
+                    string name0 = varName1;
+                    transform(name0.begin(), name0.end(), name0.begin(), ::tolower);
+                    int base = var2mem.at(name0);
                     stream2 << "0x" << hex << base;
                     mipsCode.emplace_back("li $t9 " + stream2.str());
                     mipsCode.emplace_back("addu $t8 $t9 $t8");
@@ -1362,7 +1398,9 @@ void generateBranchInsIml(enum branchType type, vector<string> &inter, function 
         varName1 = "$t9";
     }
     if (varName1 == "$t9") {
-        if (fn.stackHasVar(var2) || var2mem.count(var2) != 0) {//后面可能会覆盖$t9
+        string name0 = var2;
+        transform(name0.begin(), name0.end(), name0.begin(), ::tolower);
+        if (fn.stackHasVar(var2) || var2mem.count(name0) != 0) {//后面可能会覆盖$t9
             if (!v1) {
                 mipsCode.emplace_back("la $v1 ($t9)");
                 varName1 = "$v1";
